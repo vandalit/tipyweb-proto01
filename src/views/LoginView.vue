@@ -2,8 +2,8 @@
   <div class="login">
     <h1>Inicio de Sesión</h1>
     <form @submit.prevent="handleLogin">
-      <input type="email" v-model="email" placeholder="Correo electrónico" />
-      <input type="password" v-model="password" placeholder="Contraseña" />
+      <input type="email" v-model="email" placeholder="Correo electrónico" required />
+      <input type="password" v-model="password" placeholder="Contraseña" required />
       <button type="submit">Iniciar Sesión</button>
     </form>
     <p v-if="error" class="error">{{ error }}</p>
@@ -12,6 +12,7 @@
 
 <script>
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getUserRole } from "../firebaseUtils"; // Importa la función para obtener el rol
 
 export default {
   data() {
@@ -25,10 +26,25 @@ export default {
     async handleLogin() {
       const auth = getAuth();
       try {
-        await signInWithEmailAndPassword(auth, this.email, this.password);
-        this.$router.push("/dashboard");
+        // Iniciar sesión con Firebase Authentication
+        const userCredential = await signInWithEmailAndPassword(auth, this.email, this.password);
+        const user = userCredential.user;
+
+        // Obtener el rol del usuario desde Firestore
+        const role = await getUserRole(user.uid);
+
+        // Redirigir según el rol del usuario
+        if (role === "admin") {
+          this.$router.push("/admin-dashboard");
+        } else if (role === "developer") {
+          this.$router.push("/developer-dashboard");
+        } else if (role === "evaluator") {
+          this.$router.push("/evaluator-dashboard");
+        } else {
+          this.error = "Rol no asignado. Contacta al administrador.";
+        }
       } catch (err) {
-        this.error = "Credenciales incorrectas. Intente nuevamente.";
+        this.error = "Error al iniciar sesión. Verifica tus credenciales.";
       }
     },
   },
