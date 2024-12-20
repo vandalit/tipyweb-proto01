@@ -128,3 +128,6 @@ src/
 
 ### **Nota:**
 Este proyecto está diseñado con fines educativos y es ideal para aprender sobre la integración de Vue con Firebase y la gestión de roles en aplicaciones web.
+
+
+URL:  [text](https://tipyweb-proto.web.app)
